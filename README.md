@@ -1,7 +1,7 @@
 # SpringBoot-Angular-Task
 
 ## build angular app
-```js
+```javascript
     npm run build
 ```
 1. build angular app
@@ -10,7 +10,7 @@
 
 ## angular app development
 http://localhost:4200
-```js
+```javascript
     ng serve
 ```
 
@@ -26,7 +26,7 @@ http://localhost:4200
 1. Open package.json
 2. Find start script
 3. Change to below code
-```js
+```javascript
     ng serve --proxy-config proxy-config.json
 ```
 4. Create postbuild and predeploy script in package.json
