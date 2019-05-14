@@ -8,12 +8,21 @@
       <div class="panel-body">
         <div class="row">
           <div class="col-md-12">
-            <app-tasks-add></app-tasks-add>
+            <app-tasks-add
+              (onTaskAdded)="onTaskAdded($event)">
+            </app-tasks-add>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
-            <app-tasks-list></app-tasks-list>
+            <ul class="list-group">
+              <li *ngFor="let task of tasks" class="list-group-item">
+                <app-tasks-list
+                  [task]="task"
+                  (edit)="handleEdit($event)">
+                </app-tasks-list>
+              </li>
+            </ul>
           </div>
         </div>
       </div>

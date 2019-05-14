@@ -182,8 +182,7 @@ var TaskService = /** @class */ (function () {
     TaskService.prototype.getTasks = function () {
         return this.httpClient.get(this.URL);
     };
-    TaskService.prototype.saveTask = function (task, checked) {
-        task.completed = checked;
+    TaskService.prototype.saveTask = function (task) {
         return this.httpClient.post(this.URL + "/save", task);
     };
     TaskService.prototype.addTask = function (task) {
@@ -234,26 +233,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TasksAddComponent", function() { return TasksAddComponent; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _task_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../task.service */ "./src/app/tasks/task.service.ts");
-/* harmony import */ var _task_model__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../task.model */ "./src/app/tasks/task.model.ts");
-
+/* harmony import */ var _task_model__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../task.model */ "./src/app/tasks/task.model.ts");
 
 
 
 var TasksAddComponent = /** @class */ (function () {
-    function TasksAddComponent(taskService) {
-        this.taskService = taskService;
+    function TasksAddComponent() {
         this.value = "";
+        this.onTaskAdded = new _angular_core__WEBPACK_IMPORTED_MODULE_1__["EventEmitter"]();
     }
     TasksAddComponent.prototype.ngOnInit = function () {
     };
     TasksAddComponent.prototype.onTaskAdd = function (event) {
-        var _this = this;
-        var task = new _task_model__WEBPACK_IMPORTED_MODULE_3__["Task"](event.target.value, false, this.getTodayAsString());
-        this.taskService.addTask(task).subscribe(function (newTask) {
-            _this.value = "";
-            _this.taskService.onTaskAded.emit(newTask);
-        });
+        var task = new _task_model__WEBPACK_IMPORTED_MODULE_2__["Task"](event.target.value, false, this.getTodayAsString());
+        this.onTaskAdded.emit(task);
+        this.value = "";
     };
     TasksAddComponent.prototype.getTodayAsString = function () {
         var today = new Date();
@@ -266,13 +260,17 @@ var TasksAddComponent = /** @class */ (function () {
             mm = "0" + mm;
         return mm + "/" + dd + "/" + yyyy;
     };
+    tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Output"])(),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:type", _angular_core__WEBPACK_IMPORTED_MODULE_1__["EventEmitter"])
+    ], TasksAddComponent.prototype, "onTaskAdded", void 0);
     TasksAddComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
             selector: 'app-tasks-add',
             template: __webpack_require__(/*! ./tasks-add.component.html */ "./src/app/tasks/tasks-add/tasks-add.component.html"),
             styles: [__webpack_require__(/*! ./tasks-add.component.sass */ "./src/app/tasks/tasks-add/tasks-add.component.sass")]
         }),
-        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_task_service__WEBPACK_IMPORTED_MODULE_2__["TaskService"]])
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [])
     ], TasksAddComponent);
     return TasksAddComponent;
 }());
@@ -288,7 +286,7 @@ var TasksAddComponent = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<ul class=\"list-group\">\n  <li *ngFor=\"let task of tasks\" class=\"list-group-item\">\n    <div class=\"task-checkbox\">\n      <input type=\"checkbox\"\n             class=\"list-child\"\n             (change)=\"onTaskChange($event, task)\"\n             [checked]=\"task.completed\"/>\n      <span> {{ task.name }}</span>\n      <span class=\"label float-lg-right status\"\n            [class.complated]=\"task.completed\"> {{ task.dueDate }} </span>\n    </div>\n  </li>\n</ul>\n"
+module.exports = "<div class=\"task-checkbox\">\n  <input type=\"checkbox\"\n         class=\"list-child\"\n         (change)=\"onTaskChange($event)\"\n         [checked]=\"task.completed\"/>\n  <span> {{ task.name }}</span>\n  <span class=\"label float-lg-right status\"\n        [class.complated]=\"task.completed\"> {{ task.dueDate }} </span>\n</div>\n"
 
 /***/ }),
 
@@ -315,31 +313,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TasksListComponent", function() { return TasksListComponent; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _task_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../task.service */ "./src/app/tasks/task.service.ts");
+/* harmony import */ var _task_model__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../task.model */ "./src/app/tasks/task.model.ts");
 
 
 
 var TasksListComponent = /** @class */ (function () {
-    function TasksListComponent(taskService) {
-        this.taskService = taskService;
+    function TasksListComponent() {
+        this.edit = new _angular_core__WEBPACK_IMPORTED_MODULE_1__["EventEmitter"]();
     }
     TasksListComponent.prototype.ngOnInit = function () {
-        var _this = this;
-        this.taskService.getTasks().subscribe(function (tasks) {
-            _this.tasks = tasks;
-        }, function (error) { return console.log(error); });
-        this.taskService.onTaskAded.subscribe(function (newTask) { return _this.tasks.push(newTask); });
     };
-    TasksListComponent.prototype.onTaskChange = function (event, task) {
-        this.taskService.saveTask(task, event.target.checked).subscribe();
+    TasksListComponent.prototype.onTaskChange = function (event) {
+        this.task.completed = event.target.checked;
+        this.edit.emit(this.task);
     };
+    tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Input"])(),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:type", _task_model__WEBPACK_IMPORTED_MODULE_2__["Task"])
+    ], TasksListComponent.prototype, "task", void 0);
+    tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Output"])(),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:type", _angular_core__WEBPACK_IMPORTED_MODULE_1__["EventEmitter"])
+    ], TasksListComponent.prototype, "edit", void 0);
     TasksListComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
             selector: 'app-tasks-list',
             template: __webpack_require__(/*! ./tasks-list.component.html */ "./src/app/tasks/tasks-list/tasks-list.component.html"),
             styles: [__webpack_require__(/*! ./tasks-list.component.sass */ "./src/app/tasks/tasks-list/tasks-list.component.sass")]
         }),
-        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_task_service__WEBPACK_IMPORTED_MODULE_2__["TaskService"]])
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [])
     ], TasksListComponent);
     return TasksListComponent;
 }());
@@ -355,7 +357,7 @@ var TasksListComponent = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"row\">\n  <div class=\"col-md-2\">&nbsp;</div>\n  <div class=\"col-md-8\">\n    <div id=\"tasksPanel\" class=\"panel panel-default\">\n      <div class=\"panel-heading\">\n        <h3 class=\"panel-title\">My Tasks</h3>\n      </div>\n      <div class=\"panel-body\">\n        <div class=\"row\">\n          <div class=\"col-md-12\">\n            <app-tasks-add></app-tasks-add>\n          </div>\n        </div>\n        <div class=\"row\">\n          <div class=\"col-md-12\">\n            <app-tasks-list></app-tasks-list>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n  <div class=\"col-md-2\">&nbsp;</div>\n</div>\n"
+module.exports = "<div class=\"row\">\n  <div class=\"col-md-2\">&nbsp;</div>\n  <div class=\"col-md-8\">\n    <div id=\"tasksPanel\" class=\"panel panel-default\">\n      <div class=\"panel-heading\">\n        <h3 class=\"panel-title\">My Tasks</h3>\n      </div>\n      <div class=\"panel-body\">\n        <div class=\"row\">\n          <div class=\"col-md-12\">\n            <app-tasks-add\n              (onTaskAdded)=\"onTaskAdded($event)\">\n            </app-tasks-add>\n          </div>\n        </div>\n        <div class=\"row\">\n          <div class=\"col-md-12\">\n            <ul class=\"list-group\">\n              <li *ngFor=\"let task of tasks\" class=\"list-group-item\">\n                <app-tasks-list\n                  [task]=\"task\"\n                  (edit)=\"handleEdit($event)\">\n                </app-tasks-list>\n              </li>\n            </ul>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n  <div class=\"col-md-2\">&nbsp;</div>\n</div>\n"
 
 /***/ }),
 
@@ -382,12 +384,30 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TasksComponent", function() { return TasksComponent; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _task_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./task.service */ "./src/app/tasks/task.service.ts");
+
 
 
 var TasksComponent = /** @class */ (function () {
-    function TasksComponent() {
+    function TasksComponent(taskService) {
+        this.taskService = taskService;
     }
     TasksComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.taskService.getTasks().subscribe(function (tasks) {
+            _this.tasks = tasks;
+        }, function (error) { return console.log(error); });
+        this.taskService.onTaskAded.subscribe(function (newTask) { return _this.tasks.push(newTask); });
+    };
+    TasksComponent.prototype.handleEdit = function (event) {
+        this.taskService.saveTask(event).subscribe();
+    };
+    TasksComponent.prototype.onTaskAdded = function (event) {
+        var _this = this;
+        this.taskService.addTask(event).subscribe(function (task) {
+            console.log(task);
+            _this.tasks.splice(_this.tasks.length, 0, task);
+        }, function (error) { return console.log(error); });
     };
     TasksComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -395,7 +415,7 @@ var TasksComponent = /** @class */ (function () {
             template: __webpack_require__(/*! ./tasks.component.html */ "./src/app/tasks/tasks.component.html"),
             styles: [__webpack_require__(/*! ./tasks.component.sass */ "./src/app/tasks/tasks.component.sass")]
         }),
-        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [])
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_task_service__WEBPACK_IMPORTED_MODULE_2__["TaskService"]])
     ], TasksComponent);
     return TasksComponent;
 }());

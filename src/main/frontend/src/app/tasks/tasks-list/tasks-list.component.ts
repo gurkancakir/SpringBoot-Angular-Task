@@ -1,7 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { Task } from '../task.model';
-
-import { TaskService } from "../task.service";
 
 @Component({
   selector: 'app-tasks-list',
@@ -10,25 +8,20 @@ import { TaskService } from "../task.service";
 })
 export class TasksListComponent implements OnInit {
 
-  tasks: Task[];
+  @Input()
+  task:Task;
 
-  constructor(protected taskService: TaskService) { }
+  @Output()
+  edit: EventEmitter<any> = new EventEmitter<any>();
+
+  constructor() { }
 
   ngOnInit() {
-    this.taskService.getTasks().subscribe(
-      (tasks : any[]) => {
-        this.tasks = tasks
-      },
-      (error) => console.log(error)
-    );
-
-    this.taskService.onTaskAded.subscribe(
-      (newTask:Task) => this.tasks.push(newTask)
-    );
   }
 
-  onTaskChange(event, task) {
-    this.taskService.saveTask(task, event.target.checked).subscribe();
+  onTaskChange(event) {
+    this.task.completed = event.target.checked;
+    this.edit.emit(this.task);
   }
 
 }

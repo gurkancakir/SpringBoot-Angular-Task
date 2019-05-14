@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { TaskService } from "../task.service";
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import { Task } from "../task.model";
 
 @Component({
@@ -11,19 +10,18 @@ export class TasksAddComponent implements OnInit {
 
   value : string = "";
 
-  constructor(protected taskService : TaskService) { }
+  @Output()
+  onTaskAdded: EventEmitter<any> = new EventEmitter<any>();
+
+  constructor() { }
 
   ngOnInit() {
   }
 
   onTaskAdd(event) {
     let task: Task = new Task(event.target.value, false, this.getTodayAsString());
-    this.taskService.addTask(task).subscribe(
-      (newTask : Task) => {
-        this.value = "";
-        this.taskService.onTaskAded.emit(newTask);
-      }
-    );
+    this.onTaskAdded.emit(task);
+    this.value = "";
   }
 
   getTodayAsString() {
