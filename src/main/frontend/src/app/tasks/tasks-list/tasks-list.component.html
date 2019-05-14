@@ -1,13 +1,9 @@
-<ul class="list-group">
-  <li *ngFor="let task of tasks" class="list-group-item">
-    <div class="task-checkbox">
-      <input type="checkbox"
-             class="list-child"
-             (change)="onTaskChange($event, task)"
-             [checked]="task.completed"/>
-      <span> {{ task.name }}</span>
-      <span class="label float-lg-right status"
-            [class.complated]="task.completed"> {{ task.dueDate }} </span>
-    </div>
-  </li>
-</ul>
+<div class="task-checkbox">
+  <input type="checkbox"
+         class="list-child"
+         (change)="onTaskChange($event)"
+         [checked]="task.completed"/>
+  <span> {{ task.name }}</span>
+  <span class="label float-lg-right status"
+        [class.complated]="task.completed"> {{ task.dueDate }} </span>
+</div>

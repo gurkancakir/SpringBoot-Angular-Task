@@ -17,8 +17,7 @@ export class TaskService {
     return this.httpClient.get<Array<Task>>(this.URL);
   }
 
-  saveTask(task: Task, checked: boolean): Observable<Task> {
-    task.completed = checked;
+  saveTask(task: Task): Observable<Task> {
     return this.httpClient.post<Task>(`${this.URL}/save`, task);
   }
 
